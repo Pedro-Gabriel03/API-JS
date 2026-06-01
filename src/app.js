@@ -1,8 +1,7 @@
-const express = require('express');
-const axios = require('axios');
-const app = express();
+import express from 'express';
+import axios from 'axios';
 
-// Permite que a API receba e devolva JSON
+const app = express();
 app.use(express.json());
 
 app.get('/', (req, res) => {
@@ -10,24 +9,20 @@ app.get('/', (req, res) => {
 });
 
 app.get('/endereco/:cep', async (req, res) => {
-    // Limpando o CEP (removendo traços e espaços)
     const cepLimpo = req.params.cep.replace('-', '').trim();
 
-    // Validação da regra de negócio: 8 dígitos numéricos
     if (cepLimpo.length !== 8 || isNaN(cepLimpo)) {
-        return res.status(400).json({ detail: 'Formato de CEP inválido. Use 8 dígitos numéricos.' });
+        return res.status(400).json({ detail: 'Formato de CEP inválido.' });
     }
 
     try {
         const response = await axios.get(`https://viacep.com.br/ws/${cepLimpo}/json/`);
         const dados = response.data;
 
-        // O ViaCEP retorna status 200 com {"erro": "true"} se o CEP for inválido/inexistente
         if (dados.erro) {
-            return res.status(404).json({ detail: 'CEP não encontrado na base de dados' });
+            return res.status(404).json({ detail: 'CEP não encontrado' });
         }
 
-        // Retornando apenas os dados formatados
         return res.json({
             cep_formatado: dados.cep,
             logradouro: dados.logradouro,
@@ -38,10 +33,8 @@ app.get('/endereco/:cep', async (req, res) => {
         });
         
     } catch (error) {
-        // Trata quedas da API do ViaCEP
-        return res.status(502).json({ detail: 'Serviço de consulta temporariamente indisponível' });
+        return res.status(502).json({ detail: 'Serviço indisponível' });
     }
 });
 
-// Exportamos o app para que os testes possam utilizá-lo sem abrir portas de rede
-module.exports = app;
+export default app;
