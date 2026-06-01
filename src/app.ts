@@ -1,17 +1,17 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import axios from 'axios';
 
 const app = express();
 app.use(express.json());
 
-app.get('/', (req, res) => {
+app.get('/', (req: Request, res: Response) => {
     res.json({ status: 'online', servico: 'API de Endereços Corporativa' });
 });
 
-app.get('/endereco/:cep', async (req, res) => {
+app.get('/endereco/:cep', async (req: Request, res: Response): Promise<any> => {
     const cepLimpo = req.params.cep.replace('-', '').trim();
 
-    if (cepLimpo.length !== 8 || isNaN(cepLimpo)) {
+    if (cepLimpo.length !== 8 || isNaN(Number(cepLimpo))) {
         return res.status(400).json({ detail: 'Formato de CEP inválido.' });
     }
 
